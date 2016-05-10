@@ -1,4 +1,6 @@
-#include "Source.h"
+#include <iostream>
+#include "Source.hpp"
+#include <sstream>
 
 Source::Source(string fileName)
 {
@@ -10,35 +12,42 @@ void Source::init()
     ifstream sourceFile;
     sourceFile.open(this->sourceFileName.c_str());
 
-    char c;
-    sourceFile >> c;
-    while( c != EOF)
+    if(!sourceFile.is_open())
     {
-        this->content.append(c + "");
-        sourceFile >> c;
+        std::cout << "Cannot open file" << std::endl;
+        exit(1);
     }
+
+    sourceFile.seekg(0, std::ios::end);
+    (this->content).reserve(sourceFile.tellg());
+    sourceFile.seekg(0, std::ios::beg);
+
+    (this->content).assign((std::istreambuf_iterator<char>(sourceFile)), std::istreambuf_iterator<char>());
+
 }
 
 string Source::nextChar()
 {
     (this->position)++;
-    if(this->content[position] >= this->content.length())
+    if(position >= this->content.size())
     {
-        this->position = this->content.length();
+        this->position = this->content.size();
         return "";
     }
-    return "" + this->content[position];
+
+    return string(1, this->content[position]);
 }
 
 string Source::prevChar()
 {
     (this->position)--;
-    if(this->content[position] <= 0)
+    if(position < 0)
     {
         this->position = -1;
         return "";
     }
-    return "" + this->content[position];
+
+    return string(1, this->content[position]);
 }
 
 long Source::getPosition()

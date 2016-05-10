@@ -1,9 +1,13 @@
 #include <iostream>
+#include "Source.hpp"
 
 using namespace std;
 
 int main()
 {
-    cout << "Hello, World!" << endl;
+    std::string fileName = "/home/konrad/Dokumenty/CLionProjects/WebContentExtractor/index.html";
+    std::string answer;
+    Source src(fileName);
+
     return 0;
 }
