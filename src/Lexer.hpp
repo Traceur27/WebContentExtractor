@@ -12,7 +12,7 @@ class Lexer
 private:
     ifstream sourceFile;
     char lastSymbol; //used in special cases when i need to get various strings
-    bool closingQuoteSymbol = false; //i have to remember if quote symbol was the closing one
+    bool closingQuoteSymbol; //i have to remember if quote symbol was the closing one
     string getQuotedString(char alreadyTakenChar); //get all characters between quote symbols
     string getContent(char alreadyTakenChar); //get all characters between <tag> </tag>
     string getComment(char alreadyTakenChar); //get all characters between <!-- -->

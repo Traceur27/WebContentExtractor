@@ -3,6 +3,7 @@
 Lexer::Lexer(string fName)
 {
     this->sourceFile.open(fName);
+    this->closingQuoteSymbol = false;
 
     if(!this->sourceFile.is_open())
     {
