@@ -1,10 +1,10 @@
 #ifndef WEB_CONTENT_EXTRACTOR_LEXER_H
 #define WEB_CONTENT_EXTRACTOR_LEXER_H
 
-#include <string>
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
+#include "Token.h"
 
 using namespace std;
 
@@ -21,7 +21,7 @@ private:
 public:
     Lexer(string);
     ~Lexer();
-    string nextToken();
+    Token nextToken();
 };
 
 

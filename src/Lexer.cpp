@@ -20,28 +20,28 @@ Lexer::~Lexer()
 }
 
 
-string Lexer::nextToken()
+Token Lexer::nextToken()
 {
     char c = (char)this->sourceFile.get();
     char nextC;
     string buffer;
 
     if(c == EOF)
-        return "";
+        return Token("", Token::EMPTY);
     if(this->lastSymbol == '\'' || this->lastSymbol == '\"')
     {
         if(!this->closingQuoteSymbol) //if it's closing quote don't call getQuotedString
         {
             string ret = getQuotedString(c);
             if (ret.length() != 0)
-                return ret;
+                return Token(ret, Token::STRING);
         }
     }
     if(this->lastSymbol == '-')
     {
         string ret = getComment(c);
         if(ret.length() != 0)
-            return ret;
+            return Token(ret, Token::STRING);
     }
     if(this->lastSymbol == '>')
     {
@@ -50,18 +50,18 @@ string Lexer::nextToken()
 
         string ret = getContent(c);
         if(ret.length() != 0)
-            return ret;
+            return Token(ret, Token::LIMITEDSTRING);
     }
 
     while(isspace(c)) //omit all whitespaces
         c = (char)this->sourceFile.get();
 
     if(c == '=') // single character tokens
-        return string(1, c);
+        return Token(c, Token::EQUALS);
     else if(c == '>')
     {
         this->lastSymbol = '>';
-        return string(1, c);
+        return Token(c, Token::CLOSETAGSYMBOL);
     }
     else if(c == '\'')
     {
@@ -70,7 +70,7 @@ string Lexer::nextToken()
         else
             this->lastSymbol = c;
 
-        return string(1, c);
+        return Token(c, Token::SINGLEQUOTE);
 
     }
     else if(c == '\"')
@@ -80,7 +80,7 @@ string Lexer::nextToken()
         else
             this->lastSymbol = c;
 
-        return string(1, c);
+        return Token(c, Token::DOUBLEQUOTE);
     }
     else if(c == '<') //tokens starting with "<"
     {
@@ -106,15 +106,15 @@ string Lexer::nextToken()
                 }
             } */
             this->sourceFile.get();
-            return "<!";
+            return Token("<!", Token::EXCLAMATION);
         }
         else if(nextC == '/')
         {
             this->sourceFile.get();
-            return "</";
+            return Token("</", Token::SLASHOPENTAGSYMBOL);
         }
         else
-            return "<";
+            return Token("<", Token::OPENTAGSYMBOL);
     }
     else if(c == '/')
     {
@@ -123,7 +123,7 @@ string Lexer::nextToken()
         {
             this->sourceFile.get();
             this->lastSymbol = '>';
-            return "/>";
+            return Token("/>", Token::SLASHCLOSETAGSYMBOL);
         }
     }
     else //collect all symbols to whitespace, <, >, /, space, =
@@ -138,7 +138,7 @@ string Lexer::nextToken()
             peekedChar = (char)this->sourceFile.peek();
         }
 
-        return buffer;
+        return Token(buffer, Token::LIMITEDSTRING);
     }
 }
 

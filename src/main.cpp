@@ -7,10 +7,10 @@ int main()
 {
     std::string fileName = "/home/konrad/Dokumenty/CLionProjects/WebContentExtractor/inputFiles/index.html";
     Lexer lexer(fileName);
-    string token = lexer.nextToken();
-    while(token != "")
+    Token token = lexer.nextToken();
+    while(token.getType() != Token::EMPTY)
     {
-        cout << token << endl;
+        cout << token.getValue() << endl;
         token = lexer.nextToken();
     }
 
