@@ -46,3 +46,15 @@ TEST_CASE("Quoted string")
     REQUIRE(lexer.nextToken().getValue() == "");
 }
 
+TEST_CASE("Commented string")
+{
+    Lexer lexer("/home/konrad/Dokumenty/CLionProjects/WebContentExtractor/inputFiles/comments.html");
+    REQUIRE(lexer.nextToken().getValue() == "<!");
+    REQUIRE(lexer.nextToken().getValue() == "DOCTYPE");
+    REQUIRE(lexer.nextToken().getValue() == "HTML");
+    REQUIRE(lexer.nextToken().getValue() == ">");
+    REQUIRE(lexer.nextToken().getValue() == "<!--");
+    REQUIRE(lexer.nextToken().getValue() == " <html lang=\"pl\"> ");
+    REQUIRE(lexer.nextToken().getValue() == "-->");
+    REQUIRE(lexer.nextToken().getValue() == "");
+}

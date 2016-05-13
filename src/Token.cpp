@@ -31,14 +31,3 @@ void Token::setType(Type t)
 {
     this->type = t;
 }
-
-
-
-
-
-
-
-
-
-
-

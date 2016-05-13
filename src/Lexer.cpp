@@ -4,6 +4,7 @@ Lexer::Lexer(string fName)
 {
     this->sourceFile.open(fName.c_str());
     this->closingQuoteSymbol = false;
+    this->endComment = false;
 
     if(!this->sourceFile.is_open())
     {
@@ -52,6 +53,14 @@ Token Lexer::nextToken()
         if(ret.length() != 0)
             return Token(ret, Token::LIMITEDSTRING);
     }
+    if(this->endComment)
+    {
+        //first - already taken
+        this->sourceFile.get(); //-
+        this->sourceFile.get(); //>
+        this->endComment = false;
+        return Token("-->", Token::COMMENTEND);
+    }
 
     while(isspace(c)) //omit all whitespaces
         c = (char)this->sourceFile.get();
@@ -88,7 +97,7 @@ Token Lexer::nextToken()
 
         if(nextC == '!')
         {
-          /*  this->sourceFile.get();
+            this->sourceFile.get();
             if(this->sourceFile.peek() == '-')
             {
                 this->sourceFile.seekg(1, ios_base::cur);
@@ -97,15 +106,14 @@ Token Lexer::nextToken()
                     this->sourceFile.seekg(-1, ios_base::cur);
                     this->sourceFile.get();
                     this->sourceFile.get();
-                    this->usedQuoteOrCommentSymbol = '-';
-                    return "<!--";
+                    this->lastSymbol = '-';
+                    return Token("<!--", Token::COMMENTSTART);
                 }
                 else
                 {
                     this->sourceFile.seekg(-1, ios_base::cur);
                 }
-            } */
-            this->sourceFile.get();
+            }
             return Token("<!", Token::EXCLAMATION);
         }
         else if(nextC == '/')
@@ -201,5 +209,6 @@ string Lexer::getComment(char alreadyTakenChar)
     }
 
     this->lastSymbol = ' ';
+    this->endComment = true;
     return stringToReturn;
 }
