@@ -3,9 +3,17 @@
 
 using namespace std;
 
-int main()
+int main(int argc, char** argv)
 {
-    std::string fileName = "/home/konrad/Dokumenty/CLionProjects/WebContentExtractor/inputFiles/index.html";
+
+    if (argc != 2)
+    {
+        cout << "Usage: web-content-extractor pathToFile" << endl;
+        exit(0);
+    }
+
+    //std::string fileName = "/home/konrad/Dokumenty/CLionProjects/WebContentExtractor/inputFiles/index.html";
+    std::string fileName = argv[1];
     Lexer lexer(fileName);
     Token token = lexer.nextToken();
     while(token.getType() != Token::EMPTY)

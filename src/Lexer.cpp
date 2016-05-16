@@ -154,6 +154,12 @@ Token Lexer::nextToken()
 string Lexer::getQuotedString(char alreadyTakenChar)
 {
     string stringToReturn;
+    if(alreadyTakenChar == this->lastSymbol)
+    {
+        this->closingQuoteSymbol = true;
+        this->lastSymbol = ' ';
+        return "";
+    }
     stringToReturn += alreadyTakenChar;
     while(this->sourceFile.peek() != this->lastSymbol && this->sourceFile.peek() != EOF)
             stringToReturn += this->sourceFile.get();
@@ -172,9 +178,38 @@ string Lexer::getContent(char alreadyTakenChar)
         return "";
     }
 
+    if(alreadyTakenChar == '/')
+        if(this->sourceFile.peek() == '*')
+        {
+            this->sourceFile.get();
+            stringToReturn += "/";
+            stringToReturn += getJavaScriptComment('*');
+            alreadyTakenChar = ' ';
+        }
+
     stringToReturn += alreadyTakenChar;
-    while(this->sourceFile.peek() != '<' && this->sourceFile.peek() != EOF)
-        stringToReturn += this->sourceFile.get();
+    char peekValue = (char)this->sourceFile.peek();
+    while(peekValue != '<' && peekValue != EOF)
+    {
+        if(peekValue == '/')
+        {
+            this->sourceFile.seekg(1, ios_base::cur);
+            if (this->sourceFile.peek() == '*')
+            {
+                this->sourceFile.seekg(-1, ios_base::cur);
+                this->sourceFile.get();
+                this->sourceFile.get();
+                stringToReturn += "/";
+                stringToReturn += getJavaScriptComment('*');
+            }
+            else
+                this->sourceFile.seekg(-1, ios_base::cur);
+        }
+        else
+            stringToReturn += this->sourceFile.get();
+
+        peekValue = (char)this->sourceFile.peek();
+    }
 
     this->lastSymbol = ' ';
     return stringToReturn;
@@ -211,4 +246,31 @@ string Lexer::getComment(char alreadyTakenChar)
     this->lastSymbol = ' ';
     this->endComment = true;
     return stringToReturn;
+}
+
+string Lexer::getJavaScriptComment(char alreadyTakenChar)
+{
+    string buffer;
+    buffer += alreadyTakenChar;
+
+    char nextC = (char) this->sourceFile.peek();
+    while(nextC != EOF)
+    {
+        if(nextC == '*')
+        {
+            this->sourceFile.seekg(1, ios_base::cur);
+            if(this->sourceFile.peek() == '/')
+            {
+                this->sourceFile.seekg(-1, ios_base::cur);
+                this->sourceFile.get();
+                this->sourceFile.get();
+                buffer += "*/";
+                return buffer;
+            }
+        }
+
+        buffer += this->sourceFile.get();
+        nextC = (char) this->sourceFile.peek();
+    }
+    return "";
 }

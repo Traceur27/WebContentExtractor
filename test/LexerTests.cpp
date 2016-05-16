@@ -62,3 +62,37 @@ TEST_CASE("Commented string")
     REQUIRE(lexer.nextToken().getValue() == "-->");
     REQUIRE(lexer.nextToken().getValue() == "");
 }
+
+TEST_CASE("JavaScript comments")
+{
+    //Lexer lexer("/home/konrad/Dokumenty/CLionProjects/WebContentExtractor/inputFiles/commentsJavaScript.html");
+    Lexer lexer("../inputFiles/commentsJavaScript.html");
+    REQUIRE(lexer.nextToken().getValue() == "<");
+    REQUIRE(lexer.nextToken().getValue() == "script");
+    REQUIRE(lexer.nextToken().getValue() == "src");
+    REQUIRE(lexer.nextToken().getValue() == "=");
+    REQUIRE(lexer.nextToken().getValue() == "\"");
+    REQUIRE(lexer.nextToken().getValue() == "Onet.pl_pliki/pl1-sst-w.js");
+    REQUIRE(lexer.nextToken().getValue() == "\"");
+    REQUIRE(lexer.nextToken().getValue() == "async");
+    REQUIRE(lexer.nextToken().getValue() == "=");
+    REQUIRE(lexer.nextToken().getValue() == "\"");
+    REQUIRE(lexer.nextToken().getValue() == "\"");
+    REQUIRE(lexer.nextToken().getValue() == ">");
+    REQUIRE(lexer.nextToken().getValue() == "</");
+    REQUIRE(lexer.nextToken().getValue() == "script");
+    REQUIRE(lexer.nextToken().getValue() == ">");
+    REQUIRE(lexer.nextToken().getValue() == "<");
+    REQUIRE(lexer.nextToken().getValue() == "script");
+    REQUIRE(lexer.nextToken().getValue() == "type");
+    REQUIRE(lexer.nextToken().getValue() == "=");
+    REQUIRE(lexer.nextToken().getValue() == "\"");
+    REQUIRE(lexer.nextToken().getValue() == "text/javascript");
+    REQUIRE(lexer.nextToken().getValue() == "\"");
+    REQUIRE(lexer.nextToken().getValue() == ">");
+    REQUIRE(lexer.nextToken().getValue() == "/* <![CDATA[ */  window.suggestmeyes_loaded = true;/* ]]> */");
+    REQUIRE(lexer.nextToken().getValue() == "</");
+    REQUIRE(lexer.nextToken().getValue() == "script");
+    REQUIRE(lexer.nextToken().getValue() == ">");
+    REQUIRE(lexer.nextToken().getValue() == "");
+}

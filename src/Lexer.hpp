@@ -18,6 +18,7 @@ private:
     string getQuotedString(char alreadyTakenChar); //get all characters between quote symbols
     string getContent(char alreadyTakenChar); //get all characters between <tag> </tag>
     string getComment(char alreadyTakenChar); //get all characters between <!-- -->
+    string getJavaScriptComment(char alreadyTakenChar);
 
 public:
     Lexer(string);
