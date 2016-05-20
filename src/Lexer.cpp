@@ -3,14 +3,15 @@
 Lexer::Lexer(string fName)
 {
     this->sourceFile.open(fName.c_str());
-    this->closingQuoteSymbol = false;
-    this->endComment = false;
+    this->shouldTakeContent = false;
 
     if(!this->sourceFile.is_open())
     {
         cout << "Cannot open file" << endl;
         exit(1);
     }
+
+    this->currentChar = this->getNextChar();
 }
 
 
@@ -23,254 +24,208 @@ Lexer::~Lexer()
 
 Token Lexer::nextToken()
 {
-    char c = (char)this->sourceFile.get();
-    char nextC;
+    char nextC = this->getNextChar();
     string buffer;
 
-    if(c == EOF)
-        return Token("", Token::EMPTY);
-    if(this->lastSymbol == '\'' || this->lastSymbol == '\"')
-    {
-        if(!this->closingQuoteSymbol) //if it's closing quote don't call getQuotedString
-        {
-            string ret = getQuotedString(c);
-            if (ret.length() != 0)
-                return Token(ret, Token::STRING);
-        }
-    }
-    if(this->lastSymbol == '-')
-    {
-        string ret = getComment(c);
-        if(ret.length() != 0)
-            return Token(ret, Token::STRING);
-    }
-    if(this->lastSymbol == '>')
-    {
-        while(isspace(c)) //omit all whitespaces
-            c = (char)this->sourceFile.get();
+    if(this->currentChar == EOF)
+        return Token("", Token::EMPTY, this->position);
 
-        string ret = getContent(c);
-        if(ret.length() != 0)
-            return Token(ret, Token::LIMITEDSTRING);
-    }
-    if(this->endComment)
+    while(isspace(this->currentChar)) //omit all whitespaces
     {
-        //first - already taken
-        this->sourceFile.get(); //-
-        this->sourceFile.get(); //>
-        this->endComment = false;
-        return Token("-->", Token::COMMENTEND);
+        this->currentChar = nextC;
+        nextC = this->getNextChar();
     }
 
-    while(isspace(c)) //omit all whitespaces
-        c = (char)this->sourceFile.get();
-
-    if(c == '=') // single character tokens
-        return Token(c, Token::EQUALS);
-    else if(c == '>')
+    if(this->shouldTakeContent)
     {
-        this->lastSymbol = '>';
-        return Token(c, Token::CLOSETAGSYMBOL);
+        string s = getContent(nextC);
+        this->shouldTakeContent = false;
+        if(s != "")
+            return Token(s, Token::LIMITEDSTRING, this->position);
     }
-    else if(c == '\'')
+
+    if(this->currentChar == '=') // single character tokens
     {
-        if(this->closingQuoteSymbol)
-            this->closingQuoteSymbol = false;
-        else
-            this->lastSymbol = c;
-
-        return Token(c, Token::SINGLEQUOTE);
-
+        this->currentChar = nextC;
+        return Token('=', Token::EQUALS, this->position);
     }
-    else if(c == '\"')
+    else if(this->currentChar == '>')
     {
-        if(this->closingQuoteSymbol)
-            this->closingQuoteSymbol = false;
-        else
-            this->lastSymbol = c;
-
-        return Token(c, Token::DOUBLEQUOTE);
+        this->currentChar = nextC;
+        this->shouldTakeContent = true;
+        return Token('>', Token::CLOSETAGSYMBOL, this->position);
     }
-    else if(c == '<') //tokens starting with "<"
+    else if(this->currentChar == '\'')
     {
-        nextC = (char)this->sourceFile.peek();
-
+        string s = this->getQuotedString(nextC);
+        return Token(s, Token::SINGLEQUOTEDSTRING, this->position);
+    }
+    else if(this->currentChar == '\"')
+    {
+        string s = this->getQuotedString(nextC);
+        return Token(s, Token::DOUBLEQUOTEDSTRING, this->position);
+    }
+    else if(this->currentChar == '<') //tokens starting with "<"
+    {
         if(nextC == '!')
         {
-            this->sourceFile.get();
-            if(this->sourceFile.peek() == '-')
+            this->currentChar = this->getNextChar();
+            if(this->currentChar == '-')
             {
-                this->sourceFile.seekg(1, ios_base::cur);
-                if(this->sourceFile.peek() == '-')
-                {
-                    this->sourceFile.seekg(-1, ios_base::cur);
-                    this->sourceFile.get();
-                    this->sourceFile.get();
-                    this->lastSymbol = '-';
-                    return Token("<!--", Token::COMMENTSTART);
-                }
-                else
-                {
-                    this->sourceFile.seekg(-1, ios_base::cur);
-                }
+                string s = getComment();
+                return Token(s, Token::COMMENT, this->position);
             }
-            return Token("<!", Token::EXCLAMATION);
+            else
+            {
+                return Token("<!", Token::EXCLAMATION, this->position);
+            }
         }
         else if(nextC == '/')
         {
-            this->sourceFile.get();
-            return Token("</", Token::SLASHOPENTAGSYMBOL);
+            this->currentChar = this->getNextChar();
+            return Token("</", Token::SLASHOPENTAGSYMBOL, this->position);
         }
         else
-            return Token("<", Token::OPENTAGSYMBOL);
+        {
+            this->currentChar = nextC;
+            return Token("<", Token::OPENTAGSYMBOL, this->position);
+        }
     }
-    else if(c == '/')
+    else if(this->currentChar == '/')
     {
-        nextC = (char)this->sourceFile.peek();
         if(nextC == '>')
         {
-            this->sourceFile.get();
-            this->lastSymbol = '>';
-            return Token("/>", Token::SLASHCLOSETAGSYMBOL);
+            this->currentChar = this->getNextChar();
+            return Token("/>", Token::SLASHCLOSETAGSYMBOL, this->position);
         }
     }
     else //collect all symbols to whitespace, <, >, /, space, =
     {
         string buffer;
-        buffer += c;
-        char peekedChar = (char)this->sourceFile.peek();
-        while(peekedChar != '<' && peekedChar != '>' && peekedChar != ' ' && peekedChar != '/' &&
-              peekedChar != '=' && peekedChar != EOF)
+        buffer += this->currentChar;
+
+        while(nextC != '<' && nextC != '>' && nextC != ' ' && nextC != '/' &&
+                nextC != '=' && nextC != EOF)
         {
-            buffer += this->sourceFile.get();
-            peekedChar = (char)this->sourceFile.peek();
+            buffer += nextC;
+            nextC = this->getNextChar();
         }
 
-        return Token(buffer, Token::LIMITEDSTRING);
+        this->currentChar = nextC;
+        return Token(buffer, Token::LIMITEDSTRING, this->position);
     }
 }
 
 //Collect all chars until next quote symbol
-string Lexer::getQuotedString(char alreadyTakenChar)
+string Lexer::getQuotedString(char nextC)
 {
     string stringToReturn;
-    if(alreadyTakenChar == this->lastSymbol)
-    {
-        this->closingQuoteSymbol = true;
-        this->lastSymbol = ' ';
-        return "";
-    }
-    stringToReturn += alreadyTakenChar;
-    while(this->sourceFile.peek() != this->lastSymbol && this->sourceFile.peek() != EOF)
-            stringToReturn += this->sourceFile.get();
+    stringToReturn += this->currentChar;
 
-    this->lastSymbol = ' ';
-    this->closingQuoteSymbol = true;
+    if(this->currentChar == '\'')
+    {
+        while(nextC != '\'' && nextC != EOF)
+        {
+            stringToReturn += nextC;
+            nextC = this->getNextChar();
+        }
+    }
+    else
+    {
+        while(nextC != '\"' && nextC != EOF)
+        {
+            stringToReturn += nextC;
+            nextC = this->getNextChar();
+        }
+    }
+
+    if(nextC != '\'' && nextC != '\"')
+    {
+        cout << "Brak zakonczenia cudzyslowiu!" << endl;
+        exit(1);
+    }
+
+    stringToReturn += nextC;
+    this->currentChar = this->getNextChar();
     return stringToReturn;
 }
 
-string Lexer::getContent(char alreadyTakenChar)
+string Lexer::getContent(char nextC)
 {
     string stringToReturn;
-    if(alreadyTakenChar == '<')
-    {
-        this->lastSymbol = ' ';
+
+    if(this->currentChar == '<')
         return "";
-    }
 
-    if(alreadyTakenChar == '/')
-        if(this->sourceFile.peek() == '*')
-        {
-            this->sourceFile.get();
-            stringToReturn += "/";
-            stringToReturn += getJavaScriptComment('*');
-            alreadyTakenChar = ' ';
-        }
-
-    stringToReturn += alreadyTakenChar;
-    char peekValue = (char)this->sourceFile.peek();
-    while(peekValue != '<' && peekValue != EOF)
+    stringToReturn += this->currentChar;
+    while(nextC != '<' && nextC != EOF)
     {
-        if(peekValue == '/')
-        {
-            this->sourceFile.seekg(1, ios_base::cur);
-            if (this->sourceFile.peek() == '*')
-            {
-                this->sourceFile.seekg(-1, ios_base::cur);
-                this->sourceFile.get();
-                this->sourceFile.get();
-                stringToReturn += "/";
-                stringToReturn += getJavaScriptComment('*');
-            }
-            else
-                this->sourceFile.seekg(-1, ios_base::cur);
-        }
-        else
-            stringToReturn += this->sourceFile.get();
-
-        peekValue = (char)this->sourceFile.peek();
+        stringToReturn += nextC;
+        nextC = this->getNextChar();
     }
 
-    this->lastSymbol = ' ';
+    if(nextC == EOF)
+    {
+        cout << "Brak zakonczenia zawartosci tagu" << endl;
+        exit(1);
+    }
+
+    this->currentChar = nextC;
     return stringToReturn;
 }
 
-string Lexer::getComment(char alreadyTakenChar)
+string Lexer::getComment()
 {
-    string stringToReturn;
-    stringToReturn += alreadyTakenChar;
-    while (this->sourceFile.peek() != EOF)
+    string stringToReturn = "<!-";
+
+    char nextChar = this->getNextChar();
+    if(nextChar != '-')
     {
-        char c = (char) this->sourceFile.peek();
-        if (c == '-')
+        cout << "Bledny symbol rozpoczecia komentarza HTML" << endl;
+        exit(1);
+    }
+    stringToReturn += '-';
+
+    nextChar = this->getNextChar();
+    while(nextChar != EOF)
+    {
+        if(nextChar == '-')
         {
-            this->sourceFile.seekg(1, ios_base::cur);
-            if (this->sourceFile.peek() == '-')
+            stringToReturn += nextChar;
+            nextChar = this->getNextChar();
+            if(nextChar == '-')
             {
-                this->sourceFile.seekg(1, ios_base::cur);
-                if(this->sourceFile.peek() == '>')
+                stringToReturn += nextChar;
+                nextChar = this->getNextChar();
+                if(nextChar == '>')
                 {
-                    this->sourceFile.seekg(-2, ios_base::cur);
-                    break;
+                    this->currentChar = this->getNextChar();
+                    stringToReturn += ">";
+                    return stringToReturn;
                 }
-                this->sourceFile.seekg(-2, ios_base::cur);
+                else
+                    continue;
             }
             else
-                this->sourceFile.seekg(-1, ios_base::cur);
+                continue;
         }
 
-        c = (char) this->sourceFile.get();
-        stringToReturn += c;
+        stringToReturn += nextChar;
+        nextChar = this->getNextChar();
     }
 
-    this->lastSymbol = ' ';
-    this->endComment = true;
-    return stringToReturn;
+    cout << "Brak zakonczenia komentarza" << endl;
+    exit(1);
 }
 
-string Lexer::getJavaScriptComment(char alreadyTakenChar)
+
+char Lexer::getNextChar()
 {
-    string buffer;
-    buffer += alreadyTakenChar;
+    char c = (char) this->sourceFile.get();
+    if(c == '\n')
+        this->position.moveDown();
+    else
+        this->position.moveRight();
 
-    char nextC = (char) this->sourceFile.peek();
-    while(nextC != EOF)
-    {
-        if(nextC == '*')
-        {
-            this->sourceFile.seekg(1, ios_base::cur);
-            if(this->sourceFile.peek() == '/')
-            {
-                this->sourceFile.seekg(-1, ios_base::cur);
-                this->sourceFile.get();
-                this->sourceFile.get();
-                buffer += "*/";
-                return buffer;
-            }
-        }
-
-        buffer += this->sourceFile.get();
-        nextC = (char) this->sourceFile.peek();
-    }
-    return "";
+    return c;
 }

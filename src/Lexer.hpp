@@ -4,7 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
-#include "Token.h"
+#include "Token.hpp"
 
 using namespace std;
 
@@ -12,13 +12,14 @@ class Lexer
 {
 private:
     ifstream sourceFile;
-    char lastSymbol; //used in special cases when i need to get various strings
-    bool closingQuoteSymbol; //i have to remember if quote symbol was the closing one
-    bool endComment;
-    string getQuotedString(char alreadyTakenChar); //get all characters between quote symbols
-    string getContent(char alreadyTakenChar); //get all characters between <tag> </tag>
-    string getComment(char alreadyTakenChar); //get all characters between <!-- -->
-    string getJavaScriptComment(char alreadyTakenChar);
+    char currentChar;
+    Position position;
+    bool shouldTakeContent;
+
+    char getNextChar();
+    string getQuotedString(char nextC); //get all characters between quote symbols
+    string getContent(char nextC); //get all characters between <tag> </tag>
+    string getComment(); //get all characters between <!-- -->
 
 public:
     Lexer(string);
