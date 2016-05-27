@@ -42,11 +42,16 @@ Token &Token::operator=(Token token)
     return *this;
 }
 
-
-
-/*std::ostream& operator<<( std::ostream& os, const Token::Type& type )
+Position Token::getPosition()
 {
-    switch(type)
+    return this->position;
+}
+
+
+std::ostream& operator<<(std::ostream& os, Token& token)
+{
+    os << token.getValue() << "        ";
+    switch(token.getType())
     {
         case Token::OPENTAGSYMBOL: os << "OPENTAGSYMBOL"; break;
         case Token::CLOSETAGSYMBOL: os << "CLOSETAGSYMBOL"; break;
@@ -61,5 +66,7 @@ Token &Token::operator=(Token token)
         case Token::STRING: os << "STRING"; break;
         case Token::EMPTY: os << "EMPTY"; break;
     }
+
+    os << " , line:" << token.getPosition().getLine() << " , column: " << token.getPosition().getColumn() << '\n';
     return os;
-} */
+}

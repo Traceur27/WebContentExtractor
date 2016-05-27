@@ -18,7 +18,7 @@ int main(int argc, char** argv)
     Token token = lexer.nextToken();
     while(token.getType() != Token::EMPTY)
     {
-        cout << token.getValue() << " " << token.getType() << endl;
+        cout << token << endl;
         token = lexer.nextToken();
     }
 
