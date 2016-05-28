@@ -227,13 +227,3 @@ HTMLNode *SourceParser::getRoot()
 {
     return this->root;
 }
-
-
-
-
-
-
-
-
-
-

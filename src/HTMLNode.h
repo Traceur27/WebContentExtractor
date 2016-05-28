@@ -23,7 +23,7 @@ class TagNode : public HTMLNode
 {
 private:
     string tagName;
-    vector<pair<string, string>> attributes;
+    vector<pair<string, string> > attributes;
     vector<HTMLNode *> childrenNodes;
 
 public:
