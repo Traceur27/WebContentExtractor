@@ -9,7 +9,7 @@ Lexer::Lexer(string fName)
 
 void Lexer::init()
 {
-    this->sourceFile.open(this->fileName);
+    this->sourceFile.open(this->fileName.c_str());
     this->shouldTakeContent = false;
 
     if(!this->sourceFile.is_open())
