@@ -45,6 +45,12 @@ void TagNode::setTagName(string t)
     this->tagName = t;
 }
 
+TagNode::TagNode(string tagName)
+{
+    this->tagName = tagName;
+    this->isTextNode = false;
+}
+
 
 HTMLNode* TextNode::getParent()
 {
@@ -56,14 +62,17 @@ std::string TextNode::getContent()
     return this->content;
 }
 
-void TextNode::setParent(HTMLNode *p)
+
+TextNode::TextNode(string content)
 {
-    this->parent = p;
+    this->content = content;
+    this->isTextNode = true;
 }
+
 
 std::ostream& operator<<(std::ostream& os, TextNode& textNode)
 {
-    os << "Text node: " << this->content << '\n';
+    os << "Text node: " << textNode.getContent() << '\n';
     return os;
 }
 
@@ -75,7 +84,6 @@ std::ostream& operator<<(std::ostream& os, TagNode& tagNode)
         os << tagNode.getAttribute(i).first << " " << tagNode.getAttribute(i).second << " ";
     }
 
-    os << "number of children: " << this->getNumberOfChildrenNodes() << '\n';
+    os << "number of children: " << tagNode.getNumberOfChildrenNodes() << '\n';
     return os;
 }
-

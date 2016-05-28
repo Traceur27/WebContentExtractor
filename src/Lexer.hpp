@@ -11,6 +11,7 @@ using namespace std;
 class Lexer
 {
 private:
+    string fileName;
     ifstream sourceFile;
     char currentChar;
     Position position;
@@ -22,9 +23,12 @@ private:
     string getComment(); //get all characters between <!-- -->
 
 public:
+    Lexer();
     Lexer(string);
     ~Lexer();
     Token nextToken();
+    void init();
+    void setName(string fName);
 };
 
 

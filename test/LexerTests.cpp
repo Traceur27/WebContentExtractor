@@ -7,6 +7,7 @@ TEST_CASE("File with only one tag")
 {
     //Lexer lexer("/home/konrad/Dokumenty/CLionProjects/WebContentExtractor/inputFiles/oneTag.html");
     Lexer lexer("../inputFiles/oneTag.html");
+    lexer.init();
     Token token = lexer.nextToken();
     REQUIRE(token.getValue() == "<!");
     REQUIRE(token.getType() == Token::EXCLAMATION);
@@ -14,7 +15,7 @@ TEST_CASE("File with only one tag")
     REQUIRE(token.getValue() == "DOCTYPE");
     REQUIRE(token.getType() == Token::LIMITEDSTRING);
     token = lexer.nextToken();
-    REQUIRE(token.getValue() == "HTML");
+    REQUIRE(token.getValue() == "html");
     REQUIRE(token.getType() == Token::LIMITEDSTRING);
     token = lexer.nextToken();
     REQUIRE(token.getValue() == ">");
@@ -24,10 +25,11 @@ TEST_CASE("File with only one tag")
     REQUIRE(token.getType() == Token::EMPTY);
 }
 
- TEST_CASE("New lines and content inside tags")
+TEST_CASE("New lines and content inside tags")
 {
     //Lexer lexer("/home/konrad/Dokumenty/CLionProjects/WebContentExtractor/inputFiles/contentTag.html");
     Lexer lexer("../inputFiles/contentTag.html");
+    lexer.init();
     Token token = lexer.nextToken();
     REQUIRE(token.getValue() == "<");
     REQUIRE(token.getType() == Token::OPENTAGSYMBOL);
@@ -59,6 +61,7 @@ TEST_CASE("Quoted string")
 {
     //Lexer lexer("/home/konrad/Dokumenty/CLionProjects/WebContentExtractor/inputFiles/quotedString.html");
     Lexer lexer("../inputFiles/quotedString.html");
+    lexer.init();
     Token token = lexer.nextToken();
     REQUIRE(token.getValue() == "<");
     REQUIRE(token.getType() == Token::OPENTAGSYMBOL);
@@ -96,6 +99,7 @@ TEST_CASE("Commented string")
 {
     //Lexer lexer("/home/konrad/Dokumenty/CLionProjects/WebContentExtractor/inputFiles/comments.html");
     Lexer lexer("../inputFiles/comments.html");
+    lexer.init();
     Token token = lexer.nextToken();
     REQUIRE(token.getValue() == "<!");
     REQUIRE(token.getType() == Token::EXCLAMATION);
@@ -103,7 +107,7 @@ TEST_CASE("Commented string")
     REQUIRE(token.getValue() == "DOCTYPE");
     REQUIRE(token.getType() == Token::LIMITEDSTRING);
     token = lexer.nextToken();
-    REQUIRE(token.getValue() == "HTML");
+    REQUIRE(token.getValue() == "html");
     REQUIRE(token.getType() == Token::LIMITEDSTRING);
     token = lexer.nextToken();
     REQUIRE(token.getValue() == ">");

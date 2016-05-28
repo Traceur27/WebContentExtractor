@@ -11,10 +11,15 @@ class HTMLNode
 {
 protected:
     HTMLNode * parent;
+    bool isTextNode;
+
+public:
+    bool checkIfIsTextNode() {return isTextNode;}
+    void setParent(HTMLNode * p) {this->parent = p;}
 };
 
 
-class TagNode : HTMLNode
+class TagNode : public HTMLNode
 {
 private:
     string tagName;
@@ -22,6 +27,7 @@ private:
     vector<HTMLNode *> childrenNodes;
 
 public:
+    TagNode(string tagName);
     HTMLNode* getParent();
     pair<string, string> getAttribute(int index);
     void addAttribute(string attributeName, string attributeValue);
@@ -34,14 +40,14 @@ public:
 
 };
 
-class TextNode : HTMLNode
+class TextNode : public HTMLNode
 {
 private:
     string content;
 
 public:
+    TextNode(string content);
     HTMLNode* getParent();
-    void setParent(HTMLNode* p);
     string getContent();
 };
 

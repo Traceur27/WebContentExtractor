@@ -1,8 +1,15 @@
 #include "Lexer.hpp"
 
+Lexer::Lexer() {}
+
 Lexer::Lexer(string fName)
 {
-    this->sourceFile.open(fName.c_str());
+    this->fileName = fName;
+}
+
+void Lexer::init()
+{
+    this->sourceFile.open(this->fileName);
     this->shouldTakeContent = false;
 
     if(!this->sourceFile.is_open())
@@ -13,7 +20,6 @@ Lexer::Lexer(string fName)
 
     this->currentChar = this->getNextChar();
 }
-
 
 Lexer::~Lexer()
 {
@@ -229,3 +235,9 @@ char Lexer::getNextChar()
 
     return c;
 }
+
+void Lexer::setName(string fName)
+{
+    this->fileName = fName;
+}
+
