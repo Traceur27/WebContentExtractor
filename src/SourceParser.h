@@ -7,15 +7,19 @@
 class SourceParser
 {
 private:
+    string fileName;
     Lexer lexer;
     TagNode * root;
     TagNode * currentNode;
     Token currentToken;
 
 public:
-    SourceParser(string fileName);
+    SourceParser() {};
+    SourceParser(string fName);
     ~SourceParser();
+    void init();
     void parse();
+    void setFileName(string fName);
     void freeMemory(HTMLNode * currentNode);
     void getAttributes(TagNode * tagNode);
     void listNodes(HTMLNode * node);

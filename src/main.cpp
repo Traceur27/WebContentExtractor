@@ -1,19 +1,19 @@
 #include <iostream>
-#include "Lexer.hpp"
-#include "SourceParser.h"
+#include "Extractor.h"
 
 using namespace std;
 
 int main(int argc, char** argv)
 {
 
-    if (argc != 2)
+    if (argc != 3)
     {
-        cout << "Usage: web-content-extractor pathToFile" << endl;
+        cout << "Usage: web-content-extractor configFilePath sourceFilePath" << endl;
         exit(0);
     }
 
-    std::string fileName = argv[1];
+    std::string configFileName = argv[1];
+    std::string sourceFileName = argv[2];
 
    /* Lexer lexer(fileName);
     lexer.init();
@@ -22,11 +22,14 @@ int main(int argc, char** argv)
     {
         cout << token << endl;
         token = lexer.nextToken();
-    } */
+    }
 
     SourceParser sourceParser(fileName);
     sourceParser.parse();
-    sourceParser.listNodes(sourceParser.getRoot());
+    sourceParser.listNodes(sourceParser.getRoot()); */
+
+    Extractor extractor(configFileName, sourceFileName);
+    extractor.startExtracting();
 
     return 0;
 }

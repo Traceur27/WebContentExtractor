@@ -16,6 +16,7 @@ protected:
 public:
     bool checkIfIsTextNode() {return isTextNode;}
     void setParent(HTMLNode * p) {this->parent = p;}
+    HTMLNode* getParent() {return this->parent;}
 };
 
 
@@ -28,7 +29,6 @@ private:
 
 public:
     TagNode(string tagName);
-    HTMLNode* getParent();
     pair<string, string> getAttribute(int index);
     void addAttribute(string attributeName, string attributeValue);
     void addChild(HTMLNode * child);
@@ -47,7 +47,6 @@ private:
 
 public:
     TextNode(string content);
-    HTMLNode* getParent();
     string getContent();
 };
 

@@ -1,6 +1,7 @@
 #include "SourceParser.h"
 
-SourceParser::SourceParser(string fileName)
+
+void SourceParser::init()
 {
     this->lexer.setName(fileName);
     this->lexer.init();
@@ -83,7 +84,9 @@ void SourceParser::parse()
         }
         else if(this->currentToken.getType() == Token::LIMITEDSTRING)
         {
-            this->currentNode->addChild(new TextNode(this->currentToken.getValue()));
+            HTMLNode * newNode = new TextNode(this->currentToken.getValue());
+            newNode->setParent(this->currentNode);
+            this->currentNode->addChild(newNode);
             this->currentToken = this->lexer.nextToken();
         }
         else if(this->currentToken.getType() == Token::SLASHOPENTAGSYMBOL)
@@ -227,3 +230,19 @@ HTMLNode *SourceParser::getRoot()
 {
     return this->root;
 }
+
+void SourceParser::setFileName(string fName)
+{
+    this->fileName = fName;
+}
+
+SourceParser::SourceParser(string fName)
+{
+    this->fileName = fName;
+    this->init();
+}
+
+
+
+
+

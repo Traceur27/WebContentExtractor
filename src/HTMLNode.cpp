@@ -1,10 +1,5 @@
 #include "HTMLNode.h"
 
-HTMLNode* TagNode::getParent()
-{
-    return this->parent;
-}
-
 pair<string, string> TagNode::getAttribute(int index)
 {
     return this->attributes[index];
@@ -51,11 +46,6 @@ TagNode::TagNode(string tagName)
     this->isTextNode = false;
 }
 
-
-HTMLNode* TextNode::getParent()
-{
-    return this->parent;
-}
 
 std::string TextNode::getContent()
 {
