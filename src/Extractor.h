@@ -13,7 +13,7 @@ private:
 public:
     Extractor(string configFileName, string sourceFileName);
     void startExtracting();
-    void extract(HTMLNode * config, HTMLNode * source);
+    void extract(HTMLNode * config, HTMLNode * source, bool f);
     bool compareNodes(HTMLNode * first, HTMLNode * second);
 };
 

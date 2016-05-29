@@ -8,13 +8,18 @@ Extractor::Extractor(string configFileName, string sourceFileName)
     this->source.init();
 }
 
-void Extractor::extract(HTMLNode *config, HTMLNode *source)
+void Extractor::extract(HTMLNode *config, HTMLNode *source, bool f)
 {
     if(config != nullptr)
     {
         if(config->checkIfIsTextNode())
         {
-            TagNode * parent = (TagNode *)source->getParent();
+            TagNode * parent;
+            if(!f)
+                parent = (TagNode *)source->getParent();
+            else
+                parent = (TagNode*)source;
+
             TextNode * tNode = (TextNode *)config;
             string attributeName = tNode->getContent();
             for(int i = 0; i < parent->getNumberOfAttributes(); ++i)
@@ -59,8 +64,13 @@ void Extractor::extract(HTMLNode *config, HTMLNode *source)
                         break;
                     }
                 }
-
-                extract(nextConfigNode, nextSourceNode);
+                if(nextSourceNode == nullptr)
+                {
+                    nextSourceNode = sourceNode;
+                    extract(nextConfigNode, nextSourceNode, true);
+                }
+                else
+                    extract(nextConfigNode, nextSourceNode, false);
             }
         }
     }
@@ -74,19 +84,14 @@ void Extractor::startExtracting()
     //cout << "\n\n";
     //this->source.listNodes(this->source.getRoot());
    // cout << "\n\n";
-    extract(this->configuration.getRoot(), this->source.getRoot());
+    extract(this->configuration.getRoot(), this->source.getRoot(), false);
 }
 
 bool Extractor::compareNodes(HTMLNode *first, HTMLNode *second)
 {
     if(first->checkIfIsTextNode() && second->checkIfIsTextNode())
     {
-        //TextNode * t1 = (TextNode *)first;
-        //TextNode * t2 = (TextNode *)second;
-
-        //if(t1->getContent() == t2->getContent())
-            return true;
-        //return false;
+        return true;
     }
     else if(!first->checkIfIsTextNode() && !second->checkIfIsTextNode())
     {
