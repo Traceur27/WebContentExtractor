@@ -1,7 +1,7 @@
 #ifndef WEB_CONTENT_EXTRACTOR_EXTRACTOR_H
 #define WEB_CONTENT_EXTRACTOR_EXTRACTOR_H
 
-#include "SourceParser.h"
+#include "SourceParser.hpp"
 
 class Extractor
 {
