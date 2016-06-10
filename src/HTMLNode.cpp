@@ -1,4 +1,4 @@
-#include "HTMLNode.h"
+#include "HTMLNode.hpp"
 
 pair<string, string> TagNode::getAttribute(int index)
 {

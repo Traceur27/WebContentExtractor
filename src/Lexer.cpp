@@ -50,7 +50,7 @@ Token Lexer::nextToken()
             return Token(s, Token::LIMITEDSTRING, this->position);
     }
 
-    if(this->currentChar == '=') // single character tokens
+    if(this->currentChar == '=')
     {
         this->currentChar = nextC;
         return Token('=', Token::EQUALS, this->position);
@@ -180,6 +180,7 @@ string Lexer::getContent(char nextC)
     return stringToReturn;
 }
 
+
 string Lexer::getComment()
 {
     string stringToReturn = "<!-";
@@ -240,4 +241,30 @@ void Lexer::setName(string fName)
 {
     this->fileName = fName;
 }
+
+void Lexer::parseScripts()
+{
+    char currentCharacter = this->getNextChar();
+    while(currentCharacter != EOF)
+    {
+        if(currentCharacter == '<')
+        {
+            string closeTag;
+            closeTag += currentCharacter;
+            for (int i = 0; i < 8; ++i)
+            {
+                closeTag += this->getNextChar();
+            }
+
+            if(closeTag == "</script>")
+                return;
+            else
+                currentCharacter = this->getNextChar();
+        }
+        else
+            currentCharacter = this->getNextChar();
+    }
+}
+
+
 

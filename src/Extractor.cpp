@@ -1,4 +1,4 @@
-#include "Extractor.h"
+#include "Extractor.hpp"
 
 Extractor::Extractor(string configFileName, string sourceFileName)
 {
@@ -7,6 +7,20 @@ Extractor::Extractor(string configFileName, string sourceFileName)
     this->source.setFileName(sourceFileName);
     this->source.init();
 }
+
+
+void Extractor::startExtracting()
+{
+    this->configuration.parse();
+    this->source.parse();
+    // this->configuration.listNodes(this->configuration.getRoot());
+    //cout << "\n\n";
+    //this->source.listNodes(this->source.getRoot());
+    // cout << "\n\n";
+    extract(this->configuration.getRoot(), this->source.getRoot(), false);
+}
+
+
 
 void Extractor::extract(HTMLNode *config, HTMLNode *source, bool f)
 {
@@ -76,16 +90,6 @@ void Extractor::extract(HTMLNode *config, HTMLNode *source, bool f)
     }
 }
 
-void Extractor::startExtracting()
-{
-    this->configuration.parse();
-    this->source.parse();
-   // this->configuration.listNodes(this->configuration.getRoot());
-    //cout << "\n\n";
-    //this->source.listNodes(this->source.getRoot());
-   // cout << "\n\n";
-    extract(this->configuration.getRoot(), this->source.getRoot(), false);
-}
 
 bool Extractor::compareNodes(HTMLNode *first, HTMLNode *second)
 {
@@ -120,12 +124,3 @@ bool Extractor::compareTagNodes(TagNode *t1, TagNode *t2)
     else
         return false;
 }
-
-
-
-
-
-
-
-
-

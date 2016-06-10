@@ -2,7 +2,7 @@
 #define WEB_CONTENT_EXTRACTOR_SOURCEPARSER_H
 
 #include "Lexer.hpp"
-#include "HTMLNode.h"
+#include "HTMLNode.hpp"
 
 class SourceParser
 {
@@ -12,6 +12,11 @@ private:
     TagNode * root;
     TagNode * currentNode;
     Token currentToken;
+    void parseDoctype();
+    void parseComment();
+    void parseTag();
+    void parseContent();
+    void parseClosingTag();
 
 public:
     SourceParser() {};
@@ -21,7 +26,7 @@ public:
     void parse();
     void setFileName(string fName);
     void freeMemory(HTMLNode * currentNode);
-    void getAttributes(TagNode * tagNode);
+    void setAttributes(TagNode *tagNode);
     void listNodes(HTMLNode * node);
     HTMLNode * getRoot();
 };

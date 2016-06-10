@@ -1,4 +1,4 @@
-#include "SourceParser.h"
+#include "SourceParser.hpp"
 
 
 void SourceParser::init()
@@ -14,29 +14,33 @@ void SourceParser::parse()
 {
     while(this->currentToken.getType() != Token::EMPTY)
     {
-        if(this->currentToken.getType() == Token::EXCLAMATION) // <!DOCTYPE html>
+        parseDoctype();
+        parseComment();
+        parseTag();
+        parseContent();
+        parseClosingTag();
+    }
+}
+
+
+void SourceParser::parseDoctype()
+{
+    if(this->currentToken.getType() == Token::EXCLAMATION)
+    {
+        this->currentToken = this->lexer.nextToken();
+        if (this->currentToken.getType() == Token::LIMITEDSTRING)
         {
             this->currentToken = this->lexer.nextToken();
-            if(this->currentToken.getType() == Token::LIMITEDSTRING)
+            if (this->currentToken.getType() == Token::LIMITEDSTRING)
             {
                 this->currentToken = this->lexer.nextToken();
-                if(this->currentToken.getType() == Token::LIMITEDSTRING)
+                if (this->currentToken.getType() == Token::CLOSETAGSYMBOL)
                 {
                     this->currentToken = this->lexer.nextToken();
-                    if(this->currentToken.getType() == Token::CLOSETAGSYMBOL)
-                    {
-                        this->currentToken = this->lexer.nextToken();
-                        continue;
-                    }
-                    else
-                    {
-                        cout << "Blad parsera! Oczekiwano CLOSETAGSYMBOL, a otrzymano: " << this->currentToken << endl;
-                        exit(1);
-                    }
                 }
                 else
                 {
-                    cout << "Blad parsera! Oczekiwano LIMITEDSTRING, a otrzymano: " << this->currentToken << endl;
+                    cout << "Blad parsera! Oczekiwano CLOSETAGSYMBOL, a otrzymano: " << this->currentToken << endl;
                     exit(1);
                 }
             }
@@ -46,18 +50,33 @@ void SourceParser::parse()
                 exit(1);
             }
         }
-        else if(this->currentToken.getType() == Token::COMMENT)
+        else
         {
-            this->currentToken = this->lexer.nextToken();
-            continue;
+            cout << "Blad parsera! Oczekiwano LIMITEDSTRING, a otrzymano: " << this->currentToken << endl;
+            exit(1);
         }
-        else if(this->currentToken.getType() == Token::OPENTAGSYMBOL)
+    }
+}
+
+
+void SourceParser::parseComment()
+{
+    if(this->currentToken.getType() == Token::COMMENT)
+        this->currentToken = this->lexer.nextToken();
+}
+
+
+void SourceParser::parseTag()
+{
+    if(this->currentToken.getType() == Token::OPENTAGSYMBOL)
+    {
+        this->currentToken = this->lexer.nextToken();
+        if (this->currentToken.getType() == Token::LIMITEDSTRING)
         {
-            this->currentToken = this->lexer.nextToken();
-            if(this->currentToken.getType() == Token::LIMITEDSTRING)
+            if(this->currentToken.getValue() != "script")
             {
-                TagNode * newNode = new TagNode(this->currentToken.getValue());
-                if(root == nullptr)
+                TagNode *newNode = new TagNode(this->currentToken.getValue());
+                if (root == nullptr)
                 {
                     root = newNode;
                     this->currentNode = newNode;
@@ -65,64 +84,72 @@ void SourceParser::parse()
                 }
                 else
                 {
-                    if(this->currentNode == nullptr)
+                    if (this->currentNode == nullptr)
                         this->currentNode = root;
 
                     newNode->setParent(this->currentNode);
                     this->currentNode->addChild(newNode);
                     this->currentNode = newNode;
                 }
-                getAttributes(newNode);
+                setAttributes(newNode);
 
                 this->currentToken = this->lexer.nextToken();
             }
             else
             {
-                cout << "Błąd parsera! Oczekiwano LIMITEDSTRING, a otrzymano: "<< this->currentToken << endl;
-                exit(1);
-            }
-        }
-        else if(this->currentToken.getType() == Token::LIMITEDSTRING)
-        {
-            HTMLNode * newNode = new TextNode(this->currentToken.getValue());
-            newNode->setParent(this->currentNode);
-            this->currentNode->addChild(newNode);
-            this->currentToken = this->lexer.nextToken();
-        }
-        else if(this->currentToken.getType() == Token::SLASHOPENTAGSYMBOL)
-        {
-            this->currentToken = this->lexer.nextToken();
-            if(this->currentToken.getType() == Token::LIMITEDSTRING)
-            {
+                this->lexer.parseScripts();
                 this->currentToken = this->lexer.nextToken();
-                if(this->currentToken.getType() == Token::CLOSETAGSYMBOL)
-                {
-                    this->currentNode = (TagNode*)this->currentNode->getParent();
-                    this->currentToken = this->lexer.nextToken();
-                }
-                else
-                {
-                    cout << "Błąd parsera! Oczekiwano CLOSETAGSYMBOL, a otrzymano: " << this->currentToken << endl;
-                    exit(1);
-                }
-            }
-            else
-            {
-                cout << "Błąd parsera! Oczekiwano LIMITEDSTRING, a otrzymano: " << this->currentToken << endl;
-                exit(1);
             }
         }
         else
         {
-            cout << "Błąd parsera! Oczekiwano EXCLAMATION, COMMENT lub OPENTAGSYMBOL, a otrzymano: " << this->currentToken << endl;
+            cout << "Błąd parsera! Oczekiwano LIMITEDSTRING, a otrzymano: " << this->currentToken << endl;
             exit(1);
         }
     }
 }
 
 
+void SourceParser::parseContent()
+{
+    if(this->currentToken.getType() == Token::LIMITEDSTRING)
+    {
+        HTMLNode *newNode = new TextNode(this->currentToken.getValue());
+        newNode->setParent(this->currentNode);
+        this->currentNode->addChild(newNode);
+        this->currentToken = this->lexer.nextToken();
+    }
+}
 
-void SourceParser::getAttributes(TagNode *tagNode)
+void SourceParser::parseClosingTag()
+{
+    if(this->currentToken.getType() == Token::SLASHOPENTAGSYMBOL)
+    {
+        this->currentToken = this->lexer.nextToken();
+        if (this->currentToken.getType() == Token::LIMITEDSTRING)
+        {
+            this->currentToken = this->lexer.nextToken();
+            if (this->currentToken.getType() == Token::CLOSETAGSYMBOL)
+            {
+                this->currentNode = (TagNode *) this->currentNode->getParent();
+                this->currentToken = this->lexer.nextToken();
+            }
+            else
+            {
+                cout << "Błąd parsera! Oczekiwano CLOSETAGSYMBOL, a otrzymano: " << this->currentToken << endl;
+                exit(1);
+            }
+        }
+        else
+        {
+            cout << "Błąd parsera! Oczekiwano LIMITEDSTRING, a otrzymano: " << this->currentToken << endl;
+            exit(1);
+        }
+    }
+}
+
+
+void SourceParser::setAttributes(TagNode *tagNode)
 {
     this->currentToken = this->lexer.nextToken();
     while(this->currentToken.getType() != Token::CLOSETAGSYMBOL || this->currentToken.getType() != Token::SLASHCLOSETAGSYMBOL)
@@ -241,7 +268,6 @@ SourceParser::SourceParser(string fName)
     this->fileName = fName;
     this->init();
 }
-
 
 
 

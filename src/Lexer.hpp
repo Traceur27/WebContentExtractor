@@ -29,6 +29,7 @@ public:
     Token nextToken();
     void init();
     void setName(string fName);
+    void parseScripts();
 };
 
 

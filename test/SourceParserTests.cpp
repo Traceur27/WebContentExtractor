@@ -1,6 +1,6 @@
 #include <iostream>
 #include "catch.hpp"
-#include "../src/SourceParser.h"
+#include "../src/SourceParser.hpp"
 
 TEST_CASE("Only doctype")
 {
