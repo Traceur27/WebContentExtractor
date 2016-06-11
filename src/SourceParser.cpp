@@ -93,7 +93,9 @@ void SourceParser::parseTag()
                 }
                 setAttributes(newNode);
 
-                this->currentToken = this->lexer.nextToken();
+                this->currentToken = this->lexer.getContent();
+                if(this->currentToken.getType() == Token::EMPTY)
+                    this->currentToken = this->lexer.nextToken();
             }
             else
             {

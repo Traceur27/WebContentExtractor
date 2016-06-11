@@ -15,11 +15,9 @@ private:
     ifstream sourceFile;
     char currentChar;
     Position position;
-    bool shouldTakeContent;
 
     char getNextChar();
     string getQuotedString(char nextC); //get all characters between quote symbols
-    string getContent(char nextC); //get all characters between <tag> </tag>
     string getComment(); //get all characters between <!-- -->
 
 public:
@@ -30,6 +28,7 @@ public:
     void init();
     void setName(string fName);
     void parseScripts();
+    Token getContent(); //get all characters between <tag> </tag>
 };
 
 

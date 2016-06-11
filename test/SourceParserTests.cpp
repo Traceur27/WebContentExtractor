@@ -18,21 +18,23 @@ TEST_CASE("HTML comment")
 
 TEST_CASE("HTML tag with content")
 {
-    SourceParser sourceParser("/home/konrad/Dokumenty/CLionProjects/WebContentExtractor/inputFiles/contentTag.html");
+    SourceParser sourceParser("../inputFiles/contentTag.html");
     sourceParser.parse();
     REQUIRE(1 == 1);
 }
+
 
 TEST_CASE("HTML tag with attributes")
 {
-    SourceParser sourceParser("/home/konrad/Dokumenty/CLionProjects/WebContentExtractor/inputFiles/quotedString.html");
+    SourceParser sourceParser("../inputFiles/quotedString.html");
     sourceParser.parse();
     REQUIRE(1 == 1);
 }
 
+
 TEST_CASE("Normal html document")
 {
-    SourceParser sourceParser("/home/konrad/Dokumenty/CLionProjects/WebContentExtractor/inputFiles/index.html");
+    SourceParser sourceParser("../inputFiles/index.html");
     sourceParser.parse();
     REQUIRE(1 == 1);
 }

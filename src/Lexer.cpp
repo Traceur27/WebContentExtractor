@@ -9,8 +9,7 @@ Lexer::Lexer(string fName)
 
 void Lexer::init()
 {
-    this->sourceFile.open(this->fileName);
-    this->shouldTakeContent = false;
+    this->sourceFile.open(this->fileName);;
 
     if(!this->sourceFile.is_open())
     {
@@ -42,14 +41,6 @@ Token Lexer::nextToken()
         nextC = this->getNextChar();
     }
 
-    if(this->shouldTakeContent)
-    {
-        string s = getContent(nextC);
-        this->shouldTakeContent = false;
-        if(s != "")
-            return Token(s, Token::LIMITEDSTRING, this->position);
-    }
-
     if(this->currentChar == '=')
     {
         this->currentChar = nextC;
@@ -58,7 +49,6 @@ Token Lexer::nextToken()
     else if(this->currentChar == '>')
     {
         this->currentChar = nextC;
-        this->shouldTakeContent = true;
         return Token('>', Token::CLOSETAGSYMBOL, this->position);
     }
     else if(this->currentChar == '\'')
@@ -156,14 +146,21 @@ string Lexer::getQuotedString(char nextC)
     return stringToReturn;
 }
 
-string Lexer::getContent(char nextC)
+Token Lexer::getContent()
 {
     string stringToReturn;
+    char nextC = this->currentChar;
+
+    while(isspace(nextC)) //omit all whitespaces
+    {
+        nextC = this->getNextChar();
+    }
+
+    this->currentChar = nextC;
 
     if(this->currentChar == '<')
-        return "";
+        return Token("", Token::EMPTY, this->position);
 
-    stringToReturn += this->currentChar;
     while(nextC != '<' && nextC != EOF)
     {
         stringToReturn += nextC;
@@ -177,7 +174,7 @@ string Lexer::getContent(char nextC)
     }
 
     this->currentChar = nextC;
-    return stringToReturn;
+    return Token(stringToReturn, Token::LIMITEDSTRING, this->position);
 }
 
 
